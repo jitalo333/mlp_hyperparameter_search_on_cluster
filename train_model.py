@@ -14,6 +14,7 @@ import pickle
 from optuna_MLP import MLP, optuna_objective
 from helper_functions import generate_datasets, count_labels
 
+print("Hola, estoy en train_model.py")
 #Directories
 data_dir = r"/content/drive/MyDrive/Tesis_code/Adultos/Data/1D_WS_features"
 results_dir = '/content/drive/MyDrive/Tesis_code/Adultos/Results/DL_WS_all'
