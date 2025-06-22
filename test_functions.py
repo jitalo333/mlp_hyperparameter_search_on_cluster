@@ -28,6 +28,7 @@ print("Mejores hiperparámetros:")
 for key, value in study.best_params.items():
     print(f"  {key}: {value}")
 
+"""""
 #load best model
 results_best_model = opt_model.get_results()
 
@@ -46,3 +47,5 @@ filepath = os.path.join(path, 'results_best_model.pkl')
 
 with open(filepath, 'rb') as f:
     results_best_model = pickle.load(f)
+
+"""
