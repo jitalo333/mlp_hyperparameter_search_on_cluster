@@ -6,7 +6,7 @@ from sklearn.preprocessing import MinMaxScaler
 import optuna
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
-
+from torch.utils.data import DataLoader, TensorDataset, random_split
 
 # ----------- Modelo MLP -----------
 class MLP(nn.Module):
@@ -26,11 +26,15 @@ class MLP(nn.Module):
         return self.net(x)
 
 class optuna_objective:
-    def __init__(self):
+    def __init__(self, X_train, X_test, y_train, y_test):
         self.results = {}
+        self.X_train = X_train
+        self.X_test = X_test
+        self.y_train = y_train
+        self.y_test = y_test
+
     # ----------- Método objetivo para Optuna -----------
     def objective(self, trial):
-        global X_train, X_test, y_train, y_test
 
         # ----------- Hiperparámetros a optimizar -----------
         n_layers = trial.suggest_int("n_layers", 1, 4)
@@ -49,16 +53,16 @@ class optuna_objective:
         # ----------- Escalado de datos -----------
         if scaler == 'standard':
             scaler = StandardScaler()
-            X_train = scaler.fit_transform(X_train)
-            X_test = scaler.transform(X_test)
+            self.X_train = scaler.fit_transform(self.X_train)
+            self.X_test = scaler.transform(self.X_test)
         elif scaler == 'minmax':
             scaler = MinMaxScaler()
-            X_train = scaler.fit_transform(X_train)
-            X_test = scaler.transform(X_test)
+            self.X_train = scaler.fit_transform(self.X_train)
+            self.X_test = scaler.transform(self.X_test)
 
         # ----------- Datasets y Dataloaders -----------
-        train_dataset = TensorDataset(torch.tensor(X_train, dtype=torch.float32), torch.tensor(y_train, dtype=torch.long))
-        val_dataset = TensorDataset(torch.tensor(X_test, dtype=torch.float32), torch.tensor(y_test, dtype=torch.long))
+        train_dataset = TensorDataset(torch.tensor(self.X_train, dtype=torch.float32), torch.tensor(self.y_train, dtype=torch.long))
+        val_dataset = TensorDataset(torch.tensor(self.X_test, dtype=torch.float32), torch.tensor(self.y_test, dtype=torch.long))
         n_features = train_dataset[0][0].shape[0]
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=batch_size)
@@ -126,8 +130,8 @@ class optuna_objective:
         if trial.number == 0 or acc > trial.study.best_value:
             self.eval_model(
                 model_dict=model.state_dict(),
-                X_test=X_test,
-                y_test=y_test,
+                X_test=self.X_test,
+                y_test=self.y_test,
                 best_params=trial.params,
                 epoch_number=epoch
             )

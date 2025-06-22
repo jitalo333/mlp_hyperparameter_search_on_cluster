@@ -1,4 +1,3 @@
-from torch.utils.data import DataLoader, TensorDataset, random_split
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 import optuna
@@ -13,16 +12,14 @@ from optuna_MLP import MLP, optuna_objective
 X, y = make_classification(n_samples=500, n_features=20, n_classes=3,
                            n_informative=10, random_state=42)
 
-X_tensor = torch.tensor(X, dtype=torch.float32)
-y_tensor = torch.tensor(y, dtype=torch.long)
-
-
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 
 # ----------- Lanzar la optimización -----------
 study = optuna.create_study(direction="maximize")
-opt_model = optuna_objective()
+opt_model = optuna_objective(X_train, X_test, y_train, y_test)
+del X_train, X_test, y_train, y_test
+
 study.optimize(opt_model.objective, n_trials=3)
 
 # ----------- Mostrar mejores resultados -----------
