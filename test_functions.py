@@ -28,6 +28,7 @@ print("Mejores hiperparámetros:")
 for key, value in study.best_params.items():
     print(f"  {key}: {value}")
 
+
 """""
 #load best model
 results_best_model = opt_model.get_results()
